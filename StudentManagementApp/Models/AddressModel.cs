@@ -1,11 +1,12 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace StudentManagementApp.Models;
-
-public class Address
+[Table("address")]
+public class AddressModel
 {
-    [Key]
-    public int Id { get; set; }
+    [Key] public int Id { get; set; }
+
     public string Country { get; set; } = null!;
     public string City { get; set; } = null!;
     public string Street { get; set; } = null!;

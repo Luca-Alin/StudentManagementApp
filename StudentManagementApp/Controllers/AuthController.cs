@@ -3,7 +3,9 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using StudentManagementApp.Data;
 using StudentManagementApp.Models;
+using StudentManagementApp.Models.Student;
 
 namespace StudentManagementApp.Controllers;
 
@@ -12,52 +14,45 @@ namespace StudentManagementApp.Controllers;
 public class AuthController : Controller
 {
     private readonly IConfiguration _configuration;
-    private new static readonly User User = new();
+    private readonly AppDbContext _context;
 
-    public AuthController(IConfiguration configuration)
+    public AuthController(IConfiguration configuration, AppDbContext context)
     {
         _configuration = configuration;
+        _context = context;
     }
-
-    [HttpPost("register")]
-    public ActionResult<User> Register(UserDto request)
-    {
-        string passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
-
-        User.UserName = request.UserName;
-        User.PasswordHash = passwordHash;
-
-        
-        return Ok(User);
-    }
+    
 
     [HttpPost("login")]
-    public ActionResult<User> Login(UserDto request)
+    public ActionResult<string> Login(StudentDto request)
     {
-        if (User.UserName != request.UserName)
+        var student = _context.Students.FirstOrDefault(s => s.Email == request.Email);
+        
+        if (student == null)
             return BadRequest("User not found.");
+        
+        if (!BCrypt.Net.BCrypt.Verify(request.Password, student.PasswordHash))
+            return BadRequest("User not found");
 
-        if (!BCrypt.Net.BCrypt.Verify(request.Password, User.PasswordHash))
-            return BadRequest("Wrong password.");
-
-        string token = CreateToken(User);
+        var token = CreateToken(student);
+        
         return Ok(token);
     }
 
-    private string CreateToken(User user)
+    private string CreateToken(StudentModel student)
     {
         List<Claim> claims = new()
         {
-            new Claim(ClaimTypes.Name, user.UserName)
+            new Claim(ClaimTypes.Authentication, student.Id.ToString()),
+            new Claim(ClaimTypes.Email, student.Email)
         };
-
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
             _configuration.GetSection("AppSettings:Token").Value!
         ));
         var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha512);
         var token = new JwtSecurityToken(
             claims: claims,
-            expires: DateTime.Now.AddDays(1),
+            expires: DateTime.Now.AddDays(1000),
             signingCredentials: cred
         );
         var jwt = new JwtSecurityTokenHandler().WriteToken(token);
