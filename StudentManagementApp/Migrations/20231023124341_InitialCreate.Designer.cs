@@ -11,7 +11,7 @@ using StudentManagementApp.Data;
 namespace StudentManagementApp.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20231014163911_InitialCreate")]
+    [Migration("20231023124341_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -46,6 +46,25 @@ namespace StudentManagementApp.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("address");
+                });
+
+            modelBuilder.Entity("StudentManagementApp.Models.Admin.AdminModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Admin");
                 });
 
             modelBuilder.Entity("StudentManagementApp.Models.CourseModel", b =>
@@ -102,7 +121,7 @@ namespace StudentManagementApp.Migrations
                     b.ToTable("course");
                 });
 
-            modelBuilder.Entity("StudentManagementApp.Models.Faculty", b =>
+            modelBuilder.Entity("StudentManagementApp.Models.FacultyModel", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -117,81 +136,24 @@ namespace StudentManagementApp.Migrations
                     b.ToTable("faculty");
                 });
 
-            modelBuilder.Entity("StudentManagementApp.Models.FacultyCoursesModel", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<int>("Course1Id")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Course2Id")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Course3Id")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Course4Id")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Course5Id")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Course6Id")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Course7Id")
-                        .HasColumnType("int");
-
-                    b.Property<int>("FacultyId")
-                        .HasColumnType("int");
-
-                    b.Property<byte>("Semester")
-                        .HasColumnType("tinyint unsigned");
-
-                    b.Property<byte>("Year")
-                        .HasColumnType("tinyint unsigned");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Course1Id");
-
-                    b.HasIndex("Course2Id");
-
-                    b.HasIndex("Course3Id");
-
-                    b.HasIndex("Course4Id");
-
-                    b.HasIndex("Course5Id");
-
-                    b.HasIndex("Course6Id");
-
-                    b.HasIndex("Course7Id");
-
-                    b.HasIndex("FacultyId");
-
-                    b.ToTable("facultyCourses");
-                });
-
             modelBuilder.Entity("StudentManagementApp.Models.GradeModel", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<int>("CourseModelId")
+                    b.Property<int>("CourseId")
                         .HasColumnType("int");
 
                     b.Property<int>("StudentId")
                         .HasColumnType("int");
 
-                    b.Property<byte>("Value")
-                        .HasColumnType("tinyint unsigned");
+                    b.Property<int>("Value")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CourseModelId");
+                    b.HasIndex("CourseId");
 
                     b.HasIndex("StudentId");
 
@@ -204,7 +166,7 @@ namespace StudentManagementApp.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<int>("AddressModelId")
+                    b.Property<int>("AddressId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("DateOfBirth")
@@ -232,41 +194,9 @@ namespace StudentManagementApp.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AddressModelId");
+                    b.HasIndex("AddressId");
 
                     b.ToTable("student");
-                });
-
-            modelBuilder.Entity("StudentManagementApp.Models.TeacherModel", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<int>("AddressModelId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("PhoneNumber")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AddressModelId");
-
-                    b.ToTable("teacher");
                 });
 
             modelBuilder.Entity("StudentManagementApp.Models.WhatFacultyAStudentAttendsModel", b =>
@@ -292,135 +222,57 @@ namespace StudentManagementApp.Migrations
 
             modelBuilder.Entity("StudentManagementApp.Models.CourseModel", b =>
                 {
-                    b.HasOne("StudentManagementApp.Models.Faculty", "Faculty")
+                    b.HasOne("StudentManagementApp.Models.FacultyModel", "Faculty")
                         .WithMany()
                         .HasForeignKey("FacultyId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
-
-                    b.Navigation("Faculty");
-                });
-
-            modelBuilder.Entity("StudentManagementApp.Models.FacultyCoursesModel", b =>
-                {
-                    b.HasOne("StudentManagementApp.Models.CourseModel", "Course1")
-                        .WithMany()
-                        .HasForeignKey("Course1Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("StudentManagementApp.Models.CourseModel", "Course2")
-                        .WithMany()
-                        .HasForeignKey("Course2Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("StudentManagementApp.Models.CourseModel", "Course3")
-                        .WithMany()
-                        .HasForeignKey("Course3Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("StudentManagementApp.Models.CourseModel", "Course4")
-                        .WithMany()
-                        .HasForeignKey("Course4Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("StudentManagementApp.Models.CourseModel", "Course5")
-                        .WithMany()
-                        .HasForeignKey("Course5Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("StudentManagementApp.Models.CourseModel", "Course6")
-                        .WithMany()
-                        .HasForeignKey("Course6Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("StudentManagementApp.Models.CourseModel", "Course7")
-                        .WithMany()
-                        .HasForeignKey("Course7Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("StudentManagementApp.Models.Faculty", "Faculty")
-                        .WithMany()
-                        .HasForeignKey("FacultyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Course1");
-
-                    b.Navigation("Course2");
-
-                    b.Navigation("Course3");
-
-                    b.Navigation("Course4");
-
-                    b.Navigation("Course5");
-
-                    b.Navigation("Course6");
-
-                    b.Navigation("Course7");
 
                     b.Navigation("Faculty");
                 });
 
             modelBuilder.Entity("StudentManagementApp.Models.GradeModel", b =>
                 {
-                    b.HasOne("StudentManagementApp.Models.CourseModel", "CourseModel")
+                    b.HasOne("StudentManagementApp.Models.CourseModel", "Course")
                         .WithMany()
-                        .HasForeignKey("CourseModelId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
                     b.HasOne("StudentManagementApp.Models.Student.StudentModel", "Student")
                         .WithMany()
                         .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
-                    b.Navigation("CourseModel");
+                    b.Navigation("Course");
 
                     b.Navigation("Student");
                 });
 
             modelBuilder.Entity("StudentManagementApp.Models.Student.StudentModel", b =>
                 {
-                    b.HasOne("StudentManagementApp.Models.AddressModel", "AddressModel")
+                    b.HasOne("StudentManagementApp.Models.AddressModel", "Address")
                         .WithMany()
-                        .HasForeignKey("AddressModelId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("AddressId")
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
-                    b.Navigation("AddressModel");
-                });
-
-            modelBuilder.Entity("StudentManagementApp.Models.TeacherModel", b =>
-                {
-                    b.HasOne("StudentManagementApp.Models.AddressModel", "AddressModel")
-                        .WithMany()
-                        .HasForeignKey("AddressModelId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("AddressModel");
+                    b.Navigation("Address");
                 });
 
             modelBuilder.Entity("StudentManagementApp.Models.WhatFacultyAStudentAttendsModel", b =>
                 {
-                    b.HasOne("StudentManagementApp.Models.Faculty", "Faculty")
+                    b.HasOne("StudentManagementApp.Models.FacultyModel", "Faculty")
                         .WithMany()
                         .HasForeignKey("FacultyId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
                     b.HasOne("StudentManagementApp.Models.Student.StudentModel", "Student")
                         .WithMany()
                         .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
                     b.Navigation("Faculty");

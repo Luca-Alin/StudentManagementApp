@@ -2,8 +2,7 @@ using StudentManagementApp.Models;
 
 namespace StudentManagementApp.Interfaces;
 
-public interface IFacultyRepository : IGenericMethods<Faculty>
+public interface IFacultyRepository : IGenericMethods<FacultyModel>
 {
-    Task<IEnumerable<Faculty>> GetWhatFacultiesAStudentAttends(int studentId);
-    Task<IEnumerable<Faculty>> GetAll();
+    Task<IEnumerable<FacultyModel>> GetWhatFacultiesAStudentAttends(int studentId);
 }

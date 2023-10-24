@@ -8,11 +8,11 @@ namespace StudentManagementApp.Models;
 public class CourseModel
 {
     [Key] public int Id { get; set; }
-    public Faculty Faculty { get; set; } = null!;
+    public FacultyModel Faculty { get; set; } = null!;
     public string Code { get; set; } = null!;
     public string Name { get; set; } = null!;
     public CourseType CourseType { get; set; }
-    public Year Year { get; set; }
+    public int Year { get; set; }
     public Semester Semester { get; set; }
     public int CourseHours { get; set; }
     public byte SeminarHours { get; set; }

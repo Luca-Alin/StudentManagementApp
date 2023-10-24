@@ -4,7 +4,7 @@ using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using StudentManagementApp.Data;
-using StudentManagementApp.Models;
+using StudentManagementApp.Models.Admin;
 using StudentManagementApp.Models.Student;
 
 namespace StudentManagementApp.Controllers;
@@ -13,46 +13,63 @@ namespace StudentManagementApp.Controllers;
 [ApiController]
 public class AuthController : Controller
 {
-    private readonly IConfiguration _configuration;
     private readonly AppDbContext _context;
+    private readonly IConfiguration _configuration;
 
     public AuthController(IConfiguration configuration, AppDbContext context)
     {
         _configuration = configuration;
         _context = context;
     }
-    
 
-    [HttpPost("login")]
+
+    [HttpPost("student/login")]
     public ActionResult<string> Login(StudentDto request)
     {
         var student = _context.Students.FirstOrDefault(s => s.Email == request.Email);
-        
+
         if (student == null)
             return BadRequest("User not found.");
-        
+
         if (!BCrypt.Net.BCrypt.Verify(request.Password, student.PasswordHash))
             return BadRequest("User not found");
 
-        var token = CreateToken(student);
-        
+        var jwt = CreateJwtToken(
+            new List<Claim>
+            {
+                new Claim("StudentId", student.Id.ToString()),
+                new Claim(ClaimTypes.Email, student.Email)
+            });
+
+        return Ok(jwt);
+    }
+
+    [HttpPost("admin/login")]
+    public ActionResult<string> AdminLogin(AdminDto request)
+    {
+        var admin = _context.Admin.FirstOrDefault(a => a.Email == request.Email);
+        if (admin == null)
+            return BadRequest("Admin does not exist");
+
+        var token = CreateJwtToken(
+            new List<Claim>
+            {
+                new Claim("admin", "true"),
+                new Claim(ClaimTypes.Email, admin.Email)
+            });
+
         return Ok(token);
     }
 
-    private string CreateToken(StudentModel student)
+    private string CreateJwtToken(List<Claim> claims)
     {
-        List<Claim> claims = new()
-        {
-            new Claim(ClaimTypes.Authentication, student.Id.ToString()),
-            new Claim(ClaimTypes.Email, student.Email)
-        };
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
             _configuration.GetSection("AppSettings:Token").Value!
         ));
         var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha512);
         var token = new JwtSecurityToken(
             claims: claims,
-            expires: DateTime.Now.AddDays(1000),
+            expires: DateTime.Now.AddHours(1),
             signingCredentials: cred
         );
         var jwt = new JwtSecurityTokenHandler().WriteToken(token);

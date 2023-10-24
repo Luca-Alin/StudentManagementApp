@@ -1,5 +1,6 @@
 using StudentManagementApp.Data.Enums;
 using StudentManagementApp.Models;
+using StudentManagementApp.Models.Admin;
 using StudentManagementApp.Models.Student;
 
 namespace StudentManagementApp.Data;
@@ -13,6 +14,18 @@ public static class Seed
 
         context!.Database.EnsureCreated();
 
+        var admin = new AdminModel
+        {
+            Email = "admin@fun-university.com",
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword("password")
+        };
+
+        if (!context.Admin.Any())
+        {
+            context.Add(admin);
+            context.SaveChanges();
+        }
+
         //Add students
         var student1 = new StudentModel
         {
@@ -21,7 +34,7 @@ public static class Seed
             Email = "teddysmith@fun-university.com",
             DateOfBirth = new DateTime(2000, 10, 10),
             PhoneNumber = "704-555-5555",
-            AddressModel = new AddressModel
+            Address = new AddressModel
             {
                 Country = "USA",
                 City = "Charlotte",
@@ -38,7 +51,7 @@ public static class Seed
             Email = "johndoe@fun-university.com",
             DateOfBirth = new DateTime(2000, 10, 10),
             PhoneNumber = "704-555-5555",
-            AddressModel = new AddressModel
+            Address = new AddressModel
             {
                 Country = "USA",
                 City = "Charlotte",
@@ -55,7 +68,7 @@ public static class Seed
             Email = "janedoe@fun-iniversity.com",
             DateOfBirth = new DateTime(2000, 10, 10),
             PhoneNumber = "704-555-5555",
-            AddressModel = new AddressModel
+            Address = new AddressModel
             {
                 Country = "USA",
                 City = "Charlotte",
@@ -72,7 +85,7 @@ public static class Seed
             Email = "bobsmith@fun-univsity.com",
             DateOfBirth = new DateTime(2000, 10, 10),
             PhoneNumber = "704-555-5555",
-            AddressModel = new AddressModel
+            Address = new AddressModel
             {
                 Country = "USA",
                 City = "Charlotte",
@@ -93,18 +106,18 @@ public static class Seed
 
 
         //Add faculties
-        var faculty1 = new Faculty
+        var faculty1 = new FacultyModel
         {
             Name = "Computer Science"
         };
 
-        var faculty2 = new Faculty
+        var faculty2 = new FacultyModel
         {
             Name = "Mathematics"
         };
 
         if (!context.Faculties.Any())
-            context.Faculties.AddRange(new List<Faculty>
+            context.Faculties.AddRange(new List<FacultyModel>
             {
                 faculty1, faculty2
             });
@@ -112,29 +125,6 @@ public static class Seed
         //Add courses
         AddCoursesFaculty1(context, faculty1);
 
-
-        // var facultyCourses1 = new FacultyCoursesModel
-        // {
-        //     Faculty = faculty1,
-        //     Course1 = course1,
-        //     Course2 = course2,
-        //     Course3 = course3,
-        //     Course4 = course4,
-        //     Course5 = course5,
-        //     Course6 = course6,
-        //     Course7 = course7,
-        //     Semester = 1,
-        //     Year = 1
-        // };
-        //
-        // if (!context.FacultyCoursesModel.Any())
-        // {
-        //     context.FacultyCoursesModel.AddRange(new List<FacultyCoursesModel>
-        //     {
-        //         facultyCourses1
-        //     });
-        //     context.SaveChanges();
-        // }
 
         var whatFacultyAStudentAttends1 = new WhatFacultyAStudentAttendsModel
         {
@@ -173,20 +163,18 @@ public static class Seed
 
         List<CourseModel> courses = context.Courses.ToList();
         List<StudentModel> students = context.Students.ToList();
-        List<GradeModel> grades = new List<GradeModel>();
-        Random random = new Random();
+        List<GradeModel> grades = new();
+        var random = new Random();
         foreach (var s in students)
+        foreach (var c in courses)
         {
-            foreach (var c in courses)
+            var grade = new GradeModel
             {
-                var grade = new GradeModel
-                {
-                    Value = (byte) random.Next(1, 10),
-                    Student = s,
-                    CourseModel = c
-                };
-                grades.Add(grade);
-            }
+                Value = (byte)random.Next(1, 10),
+                Student = s,
+                Course = c
+            };
+            grades.Add(grade);
         }
 
         if (!context.Grades.Any())
@@ -195,8 +183,8 @@ public static class Seed
             context.SaveChanges();
         }
     }
-        
-    private static void AddCoursesFaculty1(AppDbContext context, Faculty faculty)
+
+    private static void AddCoursesFaculty1(AppDbContext context, FacultyModel facultyModel)
     {
         if (!context.Courses.Any())
         {
@@ -204,12 +192,12 @@ public static class Seed
             {
                 new()
                 {
-                    Faculty = faculty,
+                    Faculty = facultyModel,
                     Code = "0639",
                     Name = "Fundamentals of programming",
                     CourseType = CourseType.Compulsory,
                     Semester = Semester.One,
-                    Year = Year.One,
+                    Year = 1,
                     CourseHours = 2,
                     SeminarHours = 0,
                     LaboratoryHours = 3,
@@ -220,12 +208,12 @@ public static class Seed
                 },
                 new()
                 {
-                    Faculty = faculty,
+                    Faculty = facultyModel,
                     Code = "0258",
                     Name = "Computer systems architecture",
                     CourseType = CourseType.Compulsory,
                     Semester = Semester.One,
-                    Year = Year.One,
+                    Year = 1,
                     CourseHours = 2,
                     SeminarHours = 0,
                     LaboratoryHours = 2,
@@ -236,12 +224,12 @@ public static class Seed
                 },
                 new()
                 {
-                    Faculty = faculty,
+                    Faculty = facultyModel,
                     Code = "0010",
                     Name = "Mathematical Analysis",
                     CourseType = CourseType.Compulsory,
                     Semester = Semester.One,
-                    Year = Year.One,
+                    Year = 1,
                     CourseHours = 2,
                     SeminarHours = 2,
                     LaboratoryHours = 0,
@@ -252,12 +240,12 @@ public static class Seed
                 },
                 new()
                 {
-                    Faculty = faculty,
+                    Faculty = facultyModel,
                     Code = "0712",
                     Name = "Algebraic foundations of computer science",
                     CourseType = CourseType.Compulsory,
                     Semester = Semester.One,
-                    Year = Year.One,
+                    Year = 1,
                     CourseHours = 2,
                     SeminarHours = 2,
                     LaboratoryHours = 0,
@@ -268,12 +256,12 @@ public static class Seed
                 },
                 new()
                 {
-                    Faculty = faculty,
+                    Faculty = facultyModel,
                     Code = "0713",
                     Name = "Mathematical and computational logic",
                     CourseType = CourseType.Compulsory,
                     Semester = Semester.One,
-                    Year = Year.One,
+                    Year = 1,
                     CourseHours = 2,
                     SeminarHours = 2,
                     LaboratoryHours = 0,
@@ -284,12 +272,12 @@ public static class Seed
                 },
                 new()
                 {
-                    Faculty = faculty,
+                    Faculty = facultyModel,
                     Code = "0465",
                     Name = "English I",
                     CourseType = CourseType.Compulsory,
                     Semester = Semester.One,
-                    Year = Year.One,
+                    Year = 1,
                     CourseHours = 0,
                     SeminarHours = 1,
                     LaboratoryHours = 0,
@@ -300,12 +288,12 @@ public static class Seed
                 },
                 new()
                 {
-                    Faculty = faculty,
+                    Faculty = facultyModel,
                     Code = "0651",
                     Name = "Physical Education I",
                     CourseType = CourseType.Compulsory,
                     Semester = Semester.One,
-                    Year = Year.One,
+                    Year = 1,
                     CourseHours = 0,
                     SeminarHours = 1,
                     LaboratoryHours = 0,
@@ -316,12 +304,12 @@ public static class Seed
                 },
                 new()
                 {
-                    Faculty = faculty,
+                    Faculty = facultyModel,
                     Code = "0276",
                     Name = "Operating Systems",
                     CourseType = CourseType.Compulsory,
                     Semester = Semester.Two,
-                    Year = Year.One,
+                    Year = 1,
                     CourseHours = 2,
                     SeminarHours = 0,
                     LaboratoryHours = 2,
@@ -332,12 +320,12 @@ public static class Seed
                 },
                 new()
                 {
-                    Faculty = faculty,
+                    Faculty = facultyModel,
                     Code = "0272",
                     Name = "Object-oriented programming",
                     CourseType = CourseType.Compulsory,
                     Semester = Semester.Two,
-                    Year = Year.One,
+                    Year = 1,
                     CourseHours = 2,
                     SeminarHours = 0,
                     LaboratoryHours = 3,
@@ -348,12 +336,12 @@ public static class Seed
                 },
                 new()
                 {
-                    Faculty = faculty,
+                    Faculty = facultyModel,
                     Code = "0714",
                     Name = "Fundamental algorithms",
                     CourseType = CourseType.Compulsory,
                     Semester = Semester.Two,
-                    Year = Year.One,
+                    Year = 1,
                     CourseHours = 2,
                     SeminarHours = 0,
                     LaboratoryHours = 2,
@@ -364,12 +352,12 @@ public static class Seed
                 },
                 new()
                 {
-                    Faculty = faculty,
+                    Faculty = facultyModel,
                     Code = "0256",
                     Name = "Algorithmic graphs",
                     CourseType = CourseType.Compulsory,
                     Semester = Semester.Two,
-                    Year = Year.One,
+                    Year = 1,
                     CourseHours = 2,
                     SeminarHours = 2,
                     LaboratoryHours = 0,
@@ -380,12 +368,12 @@ public static class Seed
                 },
                 new()
                 {
-                    Faculty = faculty,
+                    Faculty = facultyModel,
                     Code = "0076",
                     Name = "Computational geometry",
                     CourseType = CourseType.Compulsory,
                     Semester = Semester.Two,
-                    Year = Year.One,
+                    Year = 1,
                     CourseHours = 2,
                     SeminarHours = 2,
                     LaboratoryHours = 0,
@@ -396,12 +384,12 @@ public static class Seed
                 },
                 new()
                 {
-                    Faculty = faculty,
+                    Faculty = facultyModel,
                     Code = "",
                     Name = "English Language II",
                     CourseType = CourseType.Compulsory,
                     Semester = Semester.Two,
-                    Year = Year.One,
+                    Year = 1,
                     CourseHours = 0,
                     SeminarHours = 1,
                     LaboratoryHours = 0,
@@ -412,12 +400,12 @@ public static class Seed
                 },
                 new()
                 {
-                    Faculty = faculty,
+                    Faculty = facultyModel,
                     Code = "0652",
                     Name = "Physical Education II",
                     CourseType = CourseType.Compulsory,
                     Semester = Semester.Two,
-                    Year = Year.One,
+                    Year = 1,
                     CourseHours = 0,
                     SeminarHours = 1,
                     LaboratoryHours = 0,
@@ -425,7 +413,8 @@ public static class Seed
                     PracticeHours = 0,
                     ExaminationType = ExaminationType.Exam,
                     Credits = 3
-                }            });
+                }
+            });
             context.SaveChanges();
         }
     }

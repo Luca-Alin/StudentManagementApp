@@ -14,28 +14,79 @@ public class StudentRepository : IStudentRepository
         _context = context;
     }
 
-    public async Task<IEnumerable<StudentModel>> GetAll()
+    public async Task<IEnumerable<StudentDto>> GetStudentsByFaculty(int facultyId)
     {
-        return await _context.Students.ToListAsync();
+        var studentsInFaculty = await _context.WhatFacultyAStudentAttends
+            .Where(w => w.Faculty.Id == facultyId)
+            .Select(w => w.Student.Id)
+            .ToListAsync();
+
+        var students = await _context.Students
+            .Where(s => studentsInFaculty.Contains(s.Id))
+            .Include(s => s.Address)
+            .ToListAsync();
+
+        var studentDtos = students.Select(s => new StudentDto
+        {
+            Id = s.Id,
+            FirstName = s.FirstName,
+            LastName = s.LastName,
+            Email = s.Email,
+            Address = s.Address,
+            DateOfBirth = s.DateOfBirth,
+            PhoneNumber = s.PhoneNumber
+        });
+
+        return studentDtos;
     }
 
-    public async Task<IEnumerable<StudentModel>> GetSliceAsync(int offset, int size)
+    public async Task<IEnumerable<StudentDto>> GetAll()
     {
-        return await _context.Students
-            .Include(s => s.AddressModel)
+        var students = await _context.Students.Include(s => s.Address).ToListAsync();
+        var studentDtos = students.Select(s => new StudentDto
+        {
+            Id = s.Id,
+            FirstName = s.FirstName,
+            LastName = s.LastName,
+            Email = s.Email,
+            Address = s.Address,
+            DateOfBirth = s.DateOfBirth,
+            PhoneNumber = s.PhoneNumber
+        });
+
+        return studentDtos;
+    }
+
+    public async Task<IEnumerable<StudentDto>> GetSliceAsync(int offset, int size)
+    {
+        var students = await _context.Students
+            .Include(s => s.Address)
             .Skip(offset)
             .Take(size)
             .ToListAsync();
+
+        var studentDtos = students.Select(s => new StudentDto
+        {
+            Id = s.Id,
+            FirstName = s.FirstName,
+            LastName = s.LastName,
+            Email = s.Email,
+            Address = s.Address,
+            DateOfBirth = s.DateOfBirth,
+            PhoneNumber = s.PhoneNumber
+        });
+
+        return studentDtos;
+    }
+
+    public async Task<int> GetIdByEmailAsync(string email)
+    {
+        return await _context.Students.Where(s => s.Email == email).Select(s => s.Id).FirstOrDefaultAsync();
     }
 
     public async Task<int> GetCountAsync()
     {
-        return _context.Students.Count();
-    }
-
-    public Task<IEnumerable<StudentModel>> All()
-    {
-        throw new NotImplementedException();
+        return await _context.Students.CountAsync();
     }
 
     public bool Add(StudentModel studentModel)
@@ -61,14 +112,19 @@ public class StudentRepository : IStudentRepository
         return _context.SaveChanges() > 0;
     }
 
-    public async Task<StudentModel> GetByIdAsync(int id)
+    public async Task<StudentModel?> GetByIdAsync(int id)
     {
         var student = await _context.Students
-            .Include(s => s.AddressModel)
+            .Include(s => s.Address)
             .FirstOrDefaultAsync(s => s.Id == id);
-        if (student == null)
-            throw new Exception("student not found");
-        
+
+
         return student;
+    }
+
+    public Task<IEnumerable<StudentModel>> AllAsync()
+    {
+        //Implementing this method will expose the hashed passwords from the database
+        throw new NotImplementedException();
     }
 }

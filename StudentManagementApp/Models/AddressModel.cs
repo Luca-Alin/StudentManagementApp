@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace StudentManagementApp.Models;
+
 [Table("address")]
 public class AddressModel
 {

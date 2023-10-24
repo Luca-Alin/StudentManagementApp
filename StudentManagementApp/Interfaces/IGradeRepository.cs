@@ -4,5 +4,6 @@ namespace StudentManagementApp.Interfaces;
 
 public interface IGradeRepository : IGenericMethods<GradeModel>
 {
-    Task<int> GetGradeByStudentIdAndCourseId(int studentId, int courseId);
+    Task<GradeModel?> GetGradeByStudentIdAndCourseId(int studentId, int courseId);
+    Task<bool> DeleteByStudentId(int studentId);
 }

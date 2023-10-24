@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using StudentManagementApp.Models.Student;
 
 namespace StudentManagementApp.Models;
+
 [Table("whatFacultyAStudentAttends")]
 public class WhatFacultyAStudentAttendsModel
 {
@@ -10,5 +11,5 @@ public class WhatFacultyAStudentAttendsModel
 
     [Column("StudentId")] public StudentModel Student { get; set; } = null!;
 
-    [Column("FacultyId")] public Faculty Faculty { get; set; } = null!;
+    [Column("FacultyId")] public FacultyModel Faculty { get; set; } = null!;
 }

@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using StudentManagementApp.Data;
 using StudentManagementApp.Interfaces;
@@ -14,7 +13,8 @@ public class FacultyRepository : IFacultyRepository
     {
         _context = context;
     }
-    public async Task<IEnumerable<Faculty>> GetWhatFacultiesAStudentAttends(int studentId)
+
+    public async Task<IEnumerable<FacultyModel>> GetWhatFacultiesAStudentAttends(int studentId)
     {
         var student = _context.Students.FirstOrDefault(s => s.Id == studentId);
         var facultiesIds =
@@ -31,33 +31,41 @@ public class FacultyRepository : IFacultyRepository
         return await faculties.ToListAsync();
     }
 
-    public Task<IEnumerable<Faculty>> GetAll()
+    public Task<IEnumerable<FacultyModel>> GetAll()
     {
         throw new NotImplementedException();
     }
 
-    public Task<IEnumerable<Faculty>> All()
+    public Task<FacultyModel?> GetByIdAsync(int id)
     {
-        throw new NotImplementedException();
+        return _context.Faculties.Where(f => f.Id == id).FirstOrDefaultAsync();
     }
 
-    public bool Add(Faculty studentModel)
+    public async Task<IEnumerable<FacultyModel>> AllAsync()
     {
-        throw new NotImplementedException();
+        return await _context.Faculties.ToListAsync();
     }
 
-    public bool Update(Faculty studentModel)
+    public bool Add(FacultyModel faculty)
     {
-        throw new NotImplementedException();
+        _context.Add(faculty);
+        return Save();
     }
 
-    public bool Delete(Faculty studentModel)
+    public bool Update(FacultyModel faculty)
     {
-        throw new NotImplementedException();
+        _context.Update(faculty);
+        return Save();
+    }
+
+    public bool Delete(FacultyModel faculty)
+    {
+        _context.Remove(faculty);
+        return Save();
     }
 
     public bool Save()
     {
-        throw new NotImplementedException();
+        return _context.SaveChanges() > 0;
     }
 }

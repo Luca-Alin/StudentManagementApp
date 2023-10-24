@@ -4,12 +4,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using StudentManagementApp.Data;
+using StudentManagementApp.Identity;
 using StudentManagementApp.Interfaces;
 using StudentManagementApp.Repository;
 using Swashbuckle.AspNetCore.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
-
 
 
 builder.Services.AddControllers();
@@ -18,7 +18,7 @@ builder.Services.AddSwaggerGen(options =>
 {
     options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
     {
-        Description = "Standard Authorization header using the Bearer scheme. Example: \"bearer {token}\"",
+        Description = "Standard Authorization header using the Bearer scheme. Example: bearer {token}",
         In = ParameterLocation.Header,
         Name = "Authorization",
         Type = SecuritySchemeType.ApiKey
@@ -39,21 +39,34 @@ builder.Services
                 builder.Configuration.GetSection("AppSettings:Token").Value!
             )),
             ValidateIssuer = false,
-            ValidateAudience = false
+            ValidateAudience = false,
+            ValidIssuer = "your-issuer", // Replace with your valid issuer
+            ValidAudience = "your-audience", // Replace with your valid audience
+            ValidateLifetime = true, // Check for token expiration
+            ClockSkew = TimeSpan.Zero // No tolerance for clock skew
         };
     });
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(IdentityData.AdminUserPolicyName, p =>
+        p.RequireClaim(IdentityData.AdminUserClaimName, "true"));
+});
 
 
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddScoped<IFacultyRepository, FacultyRepository>();
 builder.Services.AddScoped<IGradeRepository, GradeRepository>();
 builder.Services.AddScoped<IGradeRepository, GradeRepository>();
-builder.Services.AddScoped<ICourseRepository, CourseRepository > ();
+builder.Services.AddScoped<ICourseRepository, CourseRepository>();
+builder.Services.AddScoped<IAdminRepository, AdminRepository>();
+builder.Services.AddScoped<IWhatFacultyAStudentAttendsRepository, WhatFacultyAStudentAttendsRepository>();
+builder.Services.AddScoped<IAddressRepository, AddressRepository>();
+
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
-    options.UseMySQL(builder.Configuration.GetSection("ConnectionDetails:DefaultConnection").Value!);
+    options.UseMySQL(builder.Configuration.GetSection("ConnectionDetails:MySqlConnection").Value!);
 });
-
 
 builder.Services.AddCors();
 
@@ -64,7 +77,7 @@ Seed.SeedData(app);
 app.UseCors(x => x
     .AllowAnyMethod()
     .AllowAnyHeader()
-    .SetIsOriginAllowed(origin => true) 
+    .SetIsOriginAllowed(origin => true)
     .AllowCredentials());
 
 
